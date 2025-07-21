@@ -1,0 +1,68 @@
+body {
+  font-family: 'Noto Sans JP', 'Roboto', sans-serif;
+  background: #fff;
+  color: #1f2937;
+  margin: 0;
+  padding: 0;
+}
+
+header, footer {
+  text-align: center;
+  padding: 1.5rem 0;
+  background: #f8fafc;
+}
+
+h1, h2, h3 {
+  color: #1e40af;
+}
+
+.cta-button {
+  display: inline-block;
+  background: #3b82f6;
+  color: #fff;
+  padding: 0.75em 2em;
+  border-radius: 8px;
+  font-size: 1.2em;
+  text-decoration: none;
+  margin: 1em 0;
+  transition: background 0.2s;
+}
+.cta-button:hover {
+  background: #1e40af;
+}
+
+ul, ol {
+  margin: 1em 0;
+  padding-left: 2em;
+}
+
+@media (max-width: 768px) {
+  body {
+    font-size: 1em;
+  }
+  header, footer {
+    padding: 1em 0;
+  }
+}
+
+:root {
+  --font-xs: 0.75rem;
+  --font-sm: 0.875rem;
+  --font-base: 1rem;
+  --font-lg: 1.125rem;
+  --font-xl: 1.5rem;
+}
+
+.font-size-xs { font-size: var(--font-xs); }
+.font-size-sm { font-size: var(--font-sm); }
+.font-size-base { font-size: var(--font-base); }
+.font-size-lg { font-size: var(--font-lg); }
+.font-size-xl { font-size: var(--font-xl); }
+
+/* アクセシビリティ用コントラスト・フォーカス */
+a:focus, button:focus {
+  outline: 2px solid #f59e0b;
+  outline-offset: 2px;
+}
+
+/* サイドバーやゲームボード等の追加スタイルは後述 */ 
