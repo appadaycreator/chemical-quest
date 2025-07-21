@@ -95,11 +95,16 @@
         }
 
         .molecule-display {
-            background: var(--bg-secondary);
-            border: 2px dashed var(--border-color);
+            background: var(--primary-color);
+            color: #fff;
+            border: 2px solid var(--accent-color);
             border-radius: 16px;
             min-height: 120px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             transition: all 0.3s ease;
+        }
+        .molecule-display .text-2xl {
+            color: #fff !important;
         }
 
         .molecule-display.valid {
