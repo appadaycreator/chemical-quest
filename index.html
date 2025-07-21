@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ケミカルクエスト - 化学式パズルゲーム | 元素記号で学ぶ化学</title>
+    <meta name="description" content="元素記号を組み合わせて化学式を作る教育的パズルゲーム。H₂Oから複雑な化合物まで、楽しく化学の基礎を学べます。無料でプレイ可能！">
+    <meta name="keywords" content="化学式,パズル,ゲーム,元素,教育,学習,化学,分子,化合物,理科">
+    
+    <!-- OGP設定 -->
+    <meta property="og:title" content="ケミカルクエスト - 化学式パズルゲーム">
+    <meta property="og:description" content="元素記号で化学式を作る！楽しく学べる化学パズルゲーム">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://appadaycreator.github.io/chemical-quest/">
+    <meta property="og:image" content="https://appadaycreator.github.io/chemical-quest/ogp.png">
+    <meta property="og:site_name" content="ケミカルクエスト">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="ケミカルクエスト - 化学式パズルゲーム">
+    <meta name="twitter:description" content="元素記号で化学式を作る！楽しく学べる化学パズルゲーム">
+    <meta name="twitter:image" content="https://appadaycreator.github.io/chemical-quest/ogp.png">
+    
+    <!-- PWA設定 -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1e40af">
+    <link rel="icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
+    <!-- CDNライブラリ -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-TXQGZRF9');</script>
+    <!-- End Google Tag Manager -->
+
+    <style>
+        :root {
+            --primary-color: #1e40af;
+            --secondary-color: #3b82f6;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --border-color: #e5e7eb;
+        }
+
+        [data-theme="dark"] {
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --bg-primary: #1f2937;
+            --bg-secondary: #111827;
+            --border-color: #374151;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', 'Roboto', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .font-size-xs { font-size: 0.75rem; }
+        .font-size-sm { font-size: 0.875rem; }
+        .font-size-base { font-size: 1rem; }
+        .font-size-lg { font-size: 1.125rem; }
+        .font-size-xl { font-size: 1.5rem; }
+
+        .element-card {
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .element-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+
+        .element-card.selected {
+            background: linear-gradient(135deg, var(--accent-color), #f97316);
+            transform: scale(1.05);
+        }
+
+        .molecule-display {
+            background: var(--bg-secondary);
+            border: 2px dashed var(--border-color);
+            border-radius: 16px;
+            min-height: 120px;
+            transition: all 0.3s ease;
+        }
+
+        .molecule-display.valid {
+            border-color: var(--success-color);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .molecule-display.invalid {
+            border-color: var(--danger-color);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .sidebar {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.open {
+            transform: translateX(0);
+        }
+
+        .game-board {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 24px;
+            padding: 2rem;
+            color: white;
+        }
+
+        .periodic-table-mini {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 4px;
+            max-width: 400px;
+        }
+
+        .loading-spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="font-size-base">
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TXQGZRF9"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <!-- Header -->
+    <header class="bg-white shadow-lg fixed w-full top-0 z-50" style="background: var(--bg-primary);">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <button id="menuToggle" class="lg:hidden text-2xl">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="text-2xl font-bold text-blue-600 flex items-center">
+                        <svg class="w-8 h-8 mr-2" viewBox="0 0 100 100" fill="currentColor">
+                            <circle cx="25" cy="25" r="8" fill="#3b82f6"/>
+                            <circle cx="75" cy="25" r="8" fill="#ef4444"/>
+                            <circle cx="50" cy="75" r="8" fill="#10b981"/>
+                            <line x1="25" y1="25" x2="75" y2="25" stroke="currentColor" stroke-width="2"/>
+                            <line x1="33" y1="33" x2="42" y2="67" stroke="currentColor" stroke-width="2"/>
+                            <line x1="67" y1="33" x2="58" y2="67" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        <span data-i18n="app.title">ケミカルクエスト</span>
+                    </h1>
+                </div>
+                
+                <nav class="hidden lg:flex space-x-6">
+                    <a href="#game" class="hover:text-blue-600 transition" data-i18n="nav.game">ゲーム</a>
+                    <a href="#learn" class="hover:text-blue-600 transition" data-i18n="nav.learn">学習</a>
+                    <a href="#about" class="hover:text-blue-600 transition" data-i18n="nav.about">使い方</a>
+                    <a href="#privacy" class="hover:text-blue-600 transition" data-i18n="nav.privacy">プライバシー</a>
+                    <a href="#contact" class="hover:text-blue-600 transition" data-i18n="nav.contact">お問い合わせ</a>
+                </nav>
+
+                <div class="flex items-center space-x-4">
+                    <select id="languageSelect" class="border rounded px-2 py-1">
+                        <option value="ja">🇯🇵 日本語</option>
+                        <option value="en">🇺🇸 English</option>
+                    </select>
+                    
+                    <select id="fontSizeSelect" class="border rounded px-2 py-1">
+                        <option value="xs">極小</option>
+                        <option value="sm">小</option>
+                        <option value="base" selected>標準</option>
+                        <option value="lg">大</option>
+                        <option value="xl">特大</option>
+                    </select>
+                    
+                    <button id="themeToggle" class="text-xl">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Sidebar -->
+    <div id="mobileSidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-lg sidebar lg:hidden" style="background: var(--bg-primary);">
+        <div class="p-4 border-b">
+            <h2 class="font-bold text-lg" data-i18n="menu.title">メニュー</h2>
+        </div>
+        <nav class="p-4 space-y-4">
+            <a href="#game" class="block hover:text-blue-600 transition" data-i18n="nav.game">ゲーム</a>
+            <a href="#learn" class="block hover:text-blue-600 transition" data-i18n="nav.learn">学習</a>
+            <a href="#about" class="block hover:text-blue-600 transition" data-i18n="nav.about">使い方</a>
+            <a href="#privacy" class="block hover:text-blue-600 transition" data-i18n="nav.privacy">プライバシー</a>
+            <a href="#contact" class="block hover:text-blue-600 transition" data-i18n="nav.contact">お問い合わせ</a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <main class="pt-16">
+        <!-- Hero Section -->
+        <section class="bg-gradient-to-br from-blue-600 to-purple-700 text-white py-20">
+            <div class="container mx-auto px-4 text-center">
+                <h2 class="text-5xl font-bold mb-6 fade-in" data-i18n="hero.title">元素記号で化学式を作ろう！</h2>
+                <p class="text-xl mb-8 opacity-90 fade-in" data-i18n="hero.subtitle">H₂Oから複雑な化合物まで、パズルで化学マスター</p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center fade-in">
+                    <button id="startGameBtn" class="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-4 px-8 rounded-full text-lg transition transform hover:scale-105" data-i18n="hero.start">
+                        ゲームスタート
+                    </button>
+                    <button id="learnModeBtn" class="bg-transparent border-2 border-white hover:bg-white hover:text-blue-600 font-bold py-4 px-8 rounded-full text-lg transition" data-i18n="hero.learn">
+                        学習モード
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Game Section -->
+        <section id="game" class="py-16 bg-gray-50" style="background: var(--bg-secondary);">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold mb-4" data-i18n="game.title">化学式パズル</h3>
+                    <p class="text-gray-600 text-lg" data-i18n="game.description">元素を組み合わせて正しい化学式を作りましょう</p>
+                </div>
+
+                <div class="max-w-6xl mx-auto">
+                    <div class="grid lg:grid-cols-4 gap-8">
+                        <!-- Game Board -->
+                        <div class="lg:col-span-3">
+                            <div class="game-board">
+                                <div class="flex justify-between items-center mb-6">
+                                    <div class="flex items-center space-x-4">
+                                        <span class="text-lg font-semibold">レベル: <span id="currentLevel">1</span></span>
+                                        <span class="text-lg font-semibold">スコア: <span id="currentScore">0</span></span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <i class="fas fa-clock"></i>
+                                        <span id="timer" class="text-lg font-mono">05:00</span>
+                                    </div>
+                                </div>
+
+                                <!-- Target Molecule -->
+                                <div class="mb-6">
+                                    <h4 class="text-xl font-semibold mb-3" data-i18n="game.target">目標化合物:</h4>
+                                    <div id="targetMolecule" class="bg-white bg-opacity-20 rounded-lg p-4 text-center">
+                                        <span class="text-2xl font-mono">H₂O</span>
+                                        <p class="text-sm mt-2 opacity-80">水</p>
+                                    </div>
+                                </div>
+
+                                <!-- Formula Builder -->
+                                <div class="mb-6">
+                                    <h4 class="text-xl font-semibold mb-3" data-i18n="game.formula">作成中の化学式:</h4>
+                                    <div id="formulaBuilder" class="molecule-display flex items-center justify-center min-h-24 bg-white bg-opacity-20 rounded-lg">
+                                        <span class="text-gray-400" data-i18n="game.drop_elements">元素をここにドラッグ</span>
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="flex flex-wrap gap-3 justify-center">
+                                    <button id="checkFormulaBtn" class="bg-green-500 hover:bg-green-600 px-6 py-3 rounded-lg font-semibold transition" data-i18n="game.check">
+                                        化学式をチェック
+                                    </button>
+                                    <button id="clearFormulaBtn" class="bg-red-500 hover:bg-red-600 px-6 py-3 rounded-lg font-semibold transition" data-i18n="game.clear">
+                                        クリア
+                                    </button>
+                                    <button id="hintBtn" class="bg-blue-500 hover:bg-blue-600 px-6 py-3 rounded-lg font-semibold transition" data-i18n="game.hint">
+                                        ヒント
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Element Palette -->
+                        <div class="lg:col-span-1">
+                            <h4 class="text-xl font-semibold mb-4" data-i18n="game.elements">利用可能な元素</h4>
+                            <div id="elementPalette" class="space-y-3">
+                                <!-- 動的に生成される元素カード -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Game Stats -->
+                <div class="mt-12 max-w-4xl mx-auto">
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="bg-white rounded-lg p-6 text-center shadow-md" style="background: var(--bg-primary);">
+                            <i class="fas fa-trophy text-3xl text-yellow-500 mb-3"></i>
+                            <h5 class="font-semibold text-lg mb-2" data-i18n="stats.correct">正解数</h5>
+                            <span id="correctCount" class="text-2xl font-bold text-green-600">0</span>
+                        </div>
+                        <div class="bg-white rounded-lg p-6 text-center shadow-md" style="background: var(--bg-primary);">
+                            <i class="fas fa-chart-line text-3xl text-blue-500 mb-3"></i>
+                            <h5 class="font-semibold text-lg mb-2" data-i18n="stats.accuracy">正解率</h5>
+                            <span id="accuracyRate" class="text-2xl font-bold text-blue-600">0%</span>
+                        </div>
+                        <div class="bg-white rounded-lg p-6 text-center shadow-md" style="background: var(--bg-primary);">
+                            <i class="fas fa-clock text-3xl text-purple-500 mb-3"></i>
+                            <h5 class="font-semibold text-lg mb-2" data-i18n="stats.best_time">最短時間</h5>
+                            <span id="bestTime" class="text-2xl font-bold text-purple-600">--:--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Learning Section -->
+        <section id="learn" class="py-16" style="background: var(--bg-primary);">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold mb-4" data-i18n="learn.title">化学を学ぼう</h3>
+                    <p class="text-gray-600 text-lg" data-i18n="learn.description">基礎から応用まで、楽しく化学を学習</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl p-6 transform hover:scale-105 transition">
+                        <i class="fas fa-atom text-3xl mb-4"></i>
+                        <h4 class="text-xl font-semibold mb-3" data-i18n="learn.basics">基礎化学</h4>
+                        <p class="mb-4" data-i18n="learn.basics_desc">原子、分子、元素の基本概念</p>
+                        <button class="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition" data-i18n="common.coming_soon">
+                            Coming Soon
+                        </button>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl p-6 transform hover:scale-105 transition">
+                        <i class="fas fa-link text-3xl mb-4"></i>
+                        <h4 class="text-xl font-semibold mb-3" data-i18n="learn.bonds">化学結合</h4>
+                        <p class="mb-4" data-i18n="learn.bonds_desc">イオン結合、共有結合、金属結合</p>
+                        <button class="bg-white text-green-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition" data-i18n="common.coming_soon">
+                            Coming Soon
+                        </button>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl p-6 transform hover:scale-105 transition">
+                        <i class="fas fa-flask text-3xl mb-4"></i>
+                        <h4 class="text-xl font-semibold mb-3" data-i18n="learn.reactions">化学反応</h4>
+                        <p class="mb-4" data-i18n="learn.reactions_desc">反応式の書き方とバランス</p>
+                        <button class="bg-white text-purple-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition" data-i18n="common.coming_soon">
+                            Coming Soon
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Periodic Table Preview -->
+                <div class="mt-16 text-center">
+                    <h4 class="text-2xl font-bold mb-8" data-i18n="learn.periodic_table">周期表</h4>
+                    <div class="bg-gray-100 rounded-xl p-8 max-w-4xl mx-auto" style="background: var(--bg-secondary);">
+                        <div class="periodic-table-mini mx-auto">
+                            <!-- 最初の数個の元素のみ表示 -->
+                        </div>
+                        <p class="mt-4 text-gray-600" data-i18n="learn.periodic_note">クリックして元素の詳細を見る（実装予定）</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SNS Share Section -->
+        <section class="py-16 bg-gradient-to-r from-pink-500 to-orange-500 text-white">
+            <div class="container mx-auto px-4 text-center">
+                <h3 class="text-3xl font-bold mb-6" data-i18n="share.title">結果をシェアしよう！</h3>
+                <div class="flex flex-wrap justify-center gap-4 mb-8">
+                    <button id="shareTwitter" class="bg-blue-400 hover:bg-blue-500 px-6 py-3 rounded-lg font-semibold transition flex items-center">
+                        <i class="fab fa-twitter mr-2"></i>
+                        Twitter
+                    </button>
+                    <button id="shareFacebook" class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-semibold transition flex items-center">
+                        <i class="fab fa-facebook-f mr-2"></i>
+                        Facebook
+                    </button>
+                    <button id="shareLine" class="bg-green-500 hover:bg-green-600 px-6 py-3 rounded-lg font-semibold transition flex items-center">
+                        <i class="fab fa-line mr-2"></i>
+                        LINE
+                    </button>
+                    <button id="copyLink" class="bg-gray-700 hover:bg-gray-800 px-6 py-3 rounded-lg font-semibold transition flex items-center">
+                        <i class="fas fa-link mr-2"></i>
+                        <span data-i18n="share.copy">リンクをコピー</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Affiliate Section -->
+        <section class="py-16 bg-gray-100" style="background: var(--bg-secondary);">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold mb-4" data-i18n="affiliate.title">おすすめ化学グッズ</h3>
+                    <p class="text-gray-600" data-i18n="affiliate.description">学習をさらに深める参考書や実験キット</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+                    <!-- アフィリエイト商品は後で設定 -->
+                    <div class="bg-white rounded-lg p-6 shadow-md text-center" style="background: var(--bg-primary);">
+                        <i class="fas fa-book text-4xl text-blue-500 mb-4"></i>
+                        <h4 class="font-semibold mb-2" data-i18n="affiliate.chemistry_book">化学参考書</h4>
+                        <p class="text-gray-600 text-sm mb-4" data-i18n="affiliate.book_desc">基礎から応用まで学べる</p>
+                        <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition" data-i18n="common.coming_soon">
+                            Coming Soon
+                        </button>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-6 shadow-md text-center" style="background: var(--bg-primary);">
+                        <i class="fas fa-table text-4xl text-green-500 mb-4"></i>
+                        <h4 class="font-semibold mb-2" data-i18n="affiliate.periodic_poster">周期表ポスター</h4>
+                        <p class="text-gray-600 text-sm mb-4" data-i18n="affiliate.poster_desc">部屋に貼って覚えよう</p>
+                        <button class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition" data-i18n="common.coming_soon">
+                            Coming Soon
+                        </button>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-6 shadow-md text-center" style="background: var(--bg-primary);">
+                        <i class="fas fa-flask text-4xl text-purple-500 mb-4"></i>
+                        <h4 class="font-semibold mb-2" data-i18n="affiliate.experiment_kit">実験キット</h4>
+                        <p class="text-gray-600 text-sm mb-4" data-i18n="affiliate.kit_desc">安全に実験体験</p>
+                        <button class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 transition" data-i18n="common.coming_soon">
+                            Coming Soon
+                        </button>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-6 shadow-md text-center" style="background: var(--bg-primary);">
+                        <i class="fas fa-atom text-4xl text-red-500 mb-4"></i>
+                        <h4 class="font-semibold mb-2" data-i18n="affiliate.molecular_model">分子模型</h4>
+                        <p class="text-gray-600 text-sm mb-4" data-i18n="affiliate.model_desc">立体的に理解しよう</p>
+                        <button class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition" data-i18n="common.coming_soon">
+                            Coming Soon
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <h4 class="text-xl font-bold mb-4" data-i18n="footer.about">ケミカルクエストについて</h4>
+                    <p class="text-gray-400 mb-4" data-i18n="footer.about_text">
+                        元素記号で化学式を作る教育的パズルゲーム。楽しく化学を学びましょう。
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-xl font-bold mb-4" data-i18n="footer.links">リンク</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#about" class="hover:text-white transition" data-i18n="nav.about">使い方</a></li>
+                        <li><a href="#privacy" class="hover:text-white transition" data-i18n="nav.privacy">プライバシーポリシー</a></li>
+                        <li><a href="#terms" class="hover:text-white transition" data-i18n="nav.terms">利用規約</a></li>
+                        <li><a href="#contact" class="hover:text-white transition" data-i18n="nav.contact">お問い合わせ</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-xl font-bold mb-4" data-i18n="footer.social">SNS</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white text-2xl transition">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white text-2xl transition">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white text-2xl transition">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-xl font-bold mb-4" data-i18n="footer.support">サポート</h4>
+                    <p class="text-gray-400 mb-2" data-i18n="footer.support_text">ご質問・ご要望はお気軽に</p>
+                    <a href="mailto:support@chemical-quest.com" class="text-blue-400 hover:text-blue-300 transition">
+                        support@chemical-quest.com
+                    </a>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 ケミカルクエスト. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        console.log('🧪 ケミカルクエスト - 初期化開始');
+
+        // アプリケーション状態
+        const gameState = {
+            currentLevel: 1,
+            score: 0,
+            correctAnswers: 0,
+            totalAttempts: 0,
+            timeRemaining: 300,
+            isGameActive: false,
+            selectedElements: [],
+            currentFormula: '',
+            targetMolecule: { formula: 'H₂O', name: '水' },
+            elements: [
+                { symbol: 'H', name: 'Hydrogen', nameJa: '水素', mass: 1, available: 10 },
+                { symbol: 'O', name: 'Oxygen', nameJa: '酸素', mass: 16, available: 5 },
+                { symbol: 'C', name: 'Carbon', nameJa: '炭素', mass: 12, available: 6 },
+                { symbol: 'N', name: 'Nitrogen', nameJa: '窒素', mass: 14, available: 4 },
+                { symbol: 'Na', name: 'Sodium', nameJa: 'ナトリウム', mass: 23, available: 3 },
+                { symbol: 'Cl', name: 'Chlorine', nameJa: '塩素', mass: 35, available: 3 },
+                { symbol: 'Ca', name: 'Calcium', nameJa: 'カルシウム', mass: 40, available: 2 },
+                { symbol: 'Fe', name: 'Iron', nameJa: '鉄', mass: 56, available: 2 }
+            ],
+            gameHistory: [],
+            settings: {
+                language: 'ja',
+                fontSize: 'base',
+                theme: 'light'
+            }
+        };
+
+        // 多言語対応
+        const translations = {
+            ja: {
+                'app.title': 'ケミカルクエスト',
+                'nav.game': 'ゲーム',
+                'nav.learn': '学習',
+                'nav.about': '使い方',
+                'nav.privacy': 'プライバシー',
+                'nav.contact': 'お問い合わせ',
+                'hero.title': '元素記号で化学式を作ろう！',
+                'hero.subtitle': 'H₂Oから複雑な化合物まで、パズルで化学マスター',
+                'hero.start': 'ゲームスタート',
+                'hero.learn': '学習モード',
+                'game.title': '化学式パズル',
+                'game.description': '元素を組み合わせて正しい化学式を作りましょう',
+                'game.target': '目標化合物:',
+                'game.formula': '作成中の化学式:',
+                'game.drop_elements': '元素をここにドラッグ',
+                'game.check': '化学式をチェック',
+                'game.clear': 'クリア',
+                'game.hint': 'ヒント',
+                'game.elements': '利用可能な元素',
+                'common.coming_soon': 'Coming Soon'
+            },
+            en: {
+                'app.title': 'Chemical Quest',
+                'nav.game': 'Game',
+                'nav.learn': 'Learn',
+                'nav.about': 'About',
+                'nav.privacy': 'Privacy',
+                'nav.contact': 'Contact',
+                'hero.title': 'Create Chemical Formulas!',
+                'hero.subtitle': 'From H₂O to complex compounds, master chemistry with puzzles',
+                'hero.start': 'Start Game',
+                'hero.learn': 'Learning Mode',
+                'game.title': 'Chemical Formula Puzzle',
+                'game.description': 'Combine elements to create correct chemical formulas',
+                'game.target': 'Target Compound:',
+                'game.formula': 'Your Formula:',
+                'game.drop_elements': 'Drag elements here',
+                'game.check': 'Check Formula',
+                'game.clear': 'Clear',
+                'game.hint': 'Hint',
+                'game.elements': 'Available Elements',
+                'common.coming_soon': 'Coming Soon'
+            }
+        };
+
+        // 初期化
+        function initializeApp() {
+            console.log('📱 アプリケーション初期化');
+            
+            // ローカルストレージから設定を読み込み
+            loadSettings();
+            
+            // イベントリスナーを設定
+            setupEventListeners();
+            
+            // UI初期化
+            initializeUI();
+            
+            // 元素パレット作成
+            createElementPalette();
+            
+            // PWA登録
+            registerServiceWorker();
+            
+            console.log('✅ 初期化完了');
+        }
+
+        // 設定読み込み
+        function loadSettings() {
+            console.log('⚙️ 設定読み込み');
+            
+            const saved = localStorage.getItem('chemicalQuest_settings');
+            if (saved) {
+                gameState.settings = { ...gameState.settings, ...JSON.parse(saved) };
+            }
+            
+            // 言語設定適用
+            document.getElementById('languageSelect').value = gameState.settings.language;
+            
+            // フォントサイズ設定適用
+            document.getElementById('fontSizeSelect').value = gameState.settings.fontSize;
+            document.body.className = `font-size-${gameState.settings.fontSize}`;
+            
+            // テーマ設定適用
+            if (gameState.settings.theme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.getElementById('themeToggle').innerHTML = '<i class="fas fa-sun"></i>';
+            }
+            
+            // 履歴読み込み
+            const history = localStorage.getItem('chemicalQuest_history');
+            if (history) {
+                gameState.gameHistory = JSON.parse(history);
+                updateStats();
+            }
+        }
+
+        // 設定保存
+        function saveSettings() {
+            localStorage.setItem('chemicalQuest_settings', JSON.stringify(gameState.settings));
+            console.log('💾 設定保存完了');
+        }
+
+        // イベントリスナー設定
+        function setupEventListeners() {
+            console.log('🎯 イベントリスナー設定');
+            
+            // メニュートグル
+            document.getElementById('menuToggle').addEventListener('click', toggleMobileMenu);
+            
+            // ゲーム開始ボタン
+            document.getElementById('startGameBtn').addEventListener('click', startGame);
+            document.getElementById('learnModeBtn').addEventListener('click', startLearnMode);
+            
+            // ゲームコントロール
+            document.getElementById('checkFormulaBtn').addEventListener('click', checkFormula);
+            document.getElementById('clearFormulaBtn').addEventListener('click', clearFormula);
+            document.getElementById('hintBtn').addEventListener('click', showHint);
+            
+            // 設定変更
+            document.getElementById('languageSelect').addEventListener('change', changeLanguage);
+            document.getElementById('fontSizeSelect').addEventListener('change', changeFontSize);
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+            
+            // SNSシェア
+            document.getElementById('shareTwitter').addEventListener('click', shareToTwitter);
+            document.getElementById('shareFacebook').addEventListener('click', shareToFacebook);
+            document.getElementById('shareLine').addEventListener('click', shareToLine);
+            document.getElementById('copyLink').addEventListener('click', copyLink);
+            
+            // モバイルサイドバーの外側クリック
+            document.addEventListener('click', (e) => {
+                const sidebar = document.getElementById('mobileSidebar');
+                const menuToggle = document.getElementById('menuToggle');
+                if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                    sidebar.classList.remove('open');
+                }
+            });
+        }
+
+        // UI初期化
+        function initializeUI() {
+            console.log('🎨 UI初期化');
+            updateLanguage();
+            updateTimer();
+            updateScore();
+        }
+
+        // 多言語更新
+        function updateLanguage() {
+            const lang = gameState.settings.language;
+            const elements = document.querySelectorAll('[data-i18n]');
+            
+            elements.forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (translations[lang] && translations[lang][key]) {
+                    element.textContent = translations[lang][key];
+                }
+            });
+        }
+
+        // 元素パレット作成
+        function createElementPalette() {
+            console.log('🔬 元素パレット作成');
+            
+            const palette = document.getElementById('elementPalette');
+            palette.innerHTML = '';
+            
+            gameState.elements.forEach((element, index) => {
+                const card = document.createElement('div');
+                card.className = 'element-card p-4 text-center cursor-pointer';
+                card.draggable = true;
+                card.innerHTML = `
+                    <div class="text-2xl font-bold mb-1">${element.symbol}</div>
+                    <div class="text-xs opacity-80">${gameState.settings.language === 'ja' ? element.nameJa : element.name}</div>
+                    <div class="text-xs mt-1">残り: ${element.available}</div>
+                `;
+                
+                // ドラッグイベント
+                card.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', JSON.stringify(element));
+                    console.log(`🔄 ドラッグ開始: ${element.symbol}`);
+                });
+                
+                // クリックイベント
+                card.addEventListener('click', () => {
+                    selectElement(element, card);
+                });
+                
+                palette.appendChild(card);
+            });
+        }
+
+        // 元素選択
+        function selectElement(element, cardElement) {
+            if (element.available <= 0) {
+                console.warn(`⚠️ ${element.symbol}は利用できません`);
+                return;
+            }
+            
+            console.log(`✅ 元素選択: ${element.symbol}`);
+            
+            // 利用可能数を減らす
+            element.available--;
+            
+            // 選択済み元素に追加
+            gameState.selectedElements.push({ ...element });
+            
+            // UIを更新
+            updateFormulaBuilder();
+            createElementPalette();
+        }
+
+        // 化学式ビルダー更新
+        function updateFormulaBuilder() {
+            const builder = document.getElementById('formulaBuilder');
+            
+            if (gameState.selectedElements.length === 0) {
+                builder.innerHTML = '<span class="text-gray-400" data-i18n="game.drop_elements">元素をここにドラッグ</span>';
+                builder.classList.remove('valid', 'invalid');
+                return;
+            }
+            
+            // 化学式を構築
+            const formulaMap = {};
+            gameState.selectedElements.forEach(element => {
+                formulaMap[element.symbol] = (formulaMap[element.symbol] || 0) + 1;
+            });
+            
+            let formula = '';
+            Object.entries(formulaMap).forEach(([symbol, count]) => {
+                formula += symbol;
+                if (count > 1) {
+                    formula += count.toString().split('').map(d => 
+                        String.fromCharCode(0x2080 + parseInt(d))
+                    ).join('');
+                }
+            });
+            
+            gameState.currentFormula = formula;
+            builder.innerHTML = `<span class="text-2xl font-mono">${formula}</span>`;
+            
+            console.log(`🧪 現在の化学式: ${formula}`);
+        }
+
+        // 化学式チェック
+        function checkFormula() {
+            console.log(`🔍 化学式チェック: ${gameState.currentFormula}`);
+            
+            if (!gameState.currentFormula) {
+                alert(gameState.settings.language === 'ja' ? 
+                    '化学式を作成してください' : 'Please create a formula first');
+                return;
+            }
+            
+            const builder = document.getElementById('formulaBuilder');
+            gameState.totalAttempts++;
+            
+            if (gameState.currentFormula === gameState.targetMolecule.formula) {
+                console.log('🎉 正解！');
+                builder.classList.add('valid');
+                builder.classList.remove('invalid');
+                
+                gameState.correctAnswers++;
+                gameState.score += 100;
+                
+                // 成功音（将来実装）
+                showSuccessMessage();
+                nextLevel();
+                
+            } else {
+                console.log('❌ 不正解');
+                builder.classList.add('invalid');
+                builder.classList.remove('valid');
+                
+                showFailureMessage();
+            }
+            
+            updateStats();
+            saveGameHistory();
+        }
+
+        // 化学式クリア
+        function clearFormula() {
+            console.log('🗑️ 化学式クリア');
+            
+            // 選択済み元素を元に戻す
+            gameState.selectedElements.forEach(element => {
+                const original = gameState.elements.find(e => e.symbol === element.symbol);
+                if (original) {
+                    original.available++;
+                }
+            });
+            
+            gameState.selectedElements = [];
+            gameState.currentFormula = '';
+            
+            updateFormulaBuilder();
+            createElementPalette();
+        }
+
+        // ヒント表示
+        function showHint() {
+            console.log('💡 ヒント表示');
+            
+            const hints = {
+                'H₂O': ['水は水素2つと酸素1つで構成されています', 'Hを2つ、Oを1つ使ってください'],
+                'NaCl': ['塩化ナトリウム（食塩）です', 'ナトリウムと塩素を1つずつ'],
+                'CO₂': ['二酸化炭素です', '炭素1つと酸素2つを組み合わせてください']
+            };
+            
+            const hint = hints[gameState.targetMolecule.formula];
+            if (hint) {
+                const message = gameState.settings.language === 'ja' ? hint[0] : hint[1];
+                alert(message);
+            } else {
+                alert('ヒントはありません');
+            }
+        }
+
+        // ゲーム開始
+        function startGame() {
+            console.log('🎮 ゲーム開始');
+            
+            gameState.isGameActive = true;
+            gameState.timeRemaining = 300; // 5分
+            gameState.score = 0;
+            gameState.currentLevel = 1;
+            
+            // 最初のターゲット分子を設定
+            setRandomTarget();
+            
+            // タイマー開始
+            startTimer();
+            
+            updateScore();
+            
+            // ゲームセクションにスクロール
+            document.getElementById('game').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 学習モード開始
+        function startLearnMode() {
+            console.log('📚 学習モード開始');
+            document.getElementById('learn').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ランダムターゲット設定
+        function setRandomTarget() {
+            const targets = [
+                { formula: 'H₂O', name: '水', nameEn: 'Water' },
+                { formula: 'NaCl', name: '塩化ナトリウム', nameEn: 'Sodium Chloride' },
+                { formula: 'CO₂', name: '二酸化炭素', nameEn: 'Carbon Dioxide' },
+                { formula: 'NH₃', name: 'アンモニア', nameEn: 'Ammonia' },
+                { formula: 'CaCl₂', name: '塩化カルシウム', nameEn: 'Calcium Chloride' }
+            ];
+            
+            gameState.targetMolecule = targets[Math.floor(Math.random() * targets.length)];
+            
+            const targetDiv = document.getElementById('targetMolecule');
+            targetDiv.innerHTML = `
+                <span class="text-2xl font-mono">${gameState.targetMolecule.formula}</span>
+                <p class="text-sm mt-2 opacity-80">
+                    ${gameState.settings.language === 'ja' ? gameState.targetMolecule.name : gameState.targetMolecule.nameEn}
+                </p>
+            `;
+            
+            console.log(`🎯 新しいターゲット: ${gameState.targetMolecule.formula}`);
+        }
+
+        // 次のレベル
+        function nextLevel() {
+            setTimeout(() => {
+                gameState.currentLevel++;
+                clearFormula();
+                setRandomTarget();
+                document.getElementById('currentLevel').textContent = gameState.currentLevel;
+                
+                console.log(`📈 レベルアップ: ${gameState.currentLevel}`);
+            }, 2000);
+        }
+
+        // 成功メッセージ
+        function showSuccessMessage() {
+            const message = gameState.settings.language === 'ja' ? 
+                '正解です！素晴らしい！' : 'Correct! Great job!';
+            
+            // 一時的な成功表示（将来はモーダルで）
+            const builder = document.getElementById('formulaBuilder');
+            const original = builder.innerHTML;
+            builder.innerHTML = `<div class="text-green-600 font-bold text-xl">${message}</div>`;
+            
+            setTimeout(() => {
+                builder.innerHTML = original;
+            }, 2000);
+        }
+
+        // 失敗メッセージ
+        function showFailureMessage() {
+            const message = gameState.settings.language === 'ja' ? 
+                '惜しい！もう一度挑戦！' : 'Close! Try again!';
+            
+            const builder = document.getElementById('formulaBuilder');
+            const original = builder.innerHTML;
+            builder.innerHTML = `<div class="text-red-600 font-bold text-xl">${message}</div>`;
+            
+            setTimeout(() => {
+                builder.innerHTML = original;
+            }, 2000);
+        }
+
+        // タイマー開始
+        function startTimer() {
+            const timer = setInterval(() => {
+                if (!gameState.isGameActive || gameState.timeRemaining <= 0) {
+                    clearInterval(timer);
+                    if (gameState.timeRemaining <= 0) {
+                        endGame();
+                    }
+                    return;
+                }
+                
+                gameState.timeRemaining--;
+                updateTimer();
+            }, 1000);
+        }
+
+        // タイマー更新
+        function updateTimer() {
+            const minutes = Math.floor(gameState.timeRemaining / 60);
+            const seconds = gameState.timeRemaining % 60;
+            const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('timer').textContent = display;
+        }
+
+        // スコア更新
+        function updateScore() {
+            document.getElementById('currentScore').textContent = gameState.score;
+            document.getElementById('currentLevel').textContent = gameState.currentLevel;
+        }
+
+        // 統計更新
+        function updateStats() {
+            const accuracy = gameState.totalAttempts > 0 ? 
+                Math.round((gameState.correctAnswers / gameState.totalAttempts) * 100) : 0;
+            
+            document.getElementById('correctCount').textContent = gameState.correctAnswers;
+            document.getElementById('accuracyRate').textContent = `${accuracy}%`;
+        }
+
+        // ゲーム履歴保存
+        function saveGameHistory() {
+            const record = {
+                timestamp: new Date().toISOString(),
+                score: gameState.score,
+                level: gameState.currentLevel,
+                accuracy: gameState.totalAttempts > 0 ? 
+                    Math.round((gameState.correctAnswers / gameState.totalAttempts) * 100) : 0
+            };
+            
+            gameState.gameHistory.push(record);
+            localStorage.setItem('chemicalQuest_history', JSON.stringify(gameState.gameHistory));
+            console.log('📊 ゲーム履歴保存');
+        }
+
+        // ゲーム終了
+        function endGame() {
+            console.log('🏁 ゲーム終了');
+            gameState.isGameActive = false;
+            
+            const message = gameState.settings.language === 'ja' ? 
+                `ゲーム終了！\nスコア: ${gameState.score}\nレベル: ${gameState.currentLevel}\n正解率: ${Math.round((gameState.correctAnswers / gameState.totalAttempts) * 100)}%` :
+                `Game Over!\nScore: ${gameState.score}\nLevel: ${gameState.currentLevel}\nAccuracy: ${Math.round((gameState.correctAnswers / gameState.totalAttempts) * 100)}%`;
+            
+            alert(message);
+            saveGameHistory();
+        }
+
+        // モバイルメニュートグル
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('mobileSidebar');
+            sidebar.classList.toggle('open');
+            console.log('📱 モバイルメニュートグル');
+        }
+
+        // 言語変更
+        function changeLanguage() {
+            const newLang = document.getElementById('languageSelect').value;
+            gameState.settings.language = newLang;
+            updateLanguage();
+            saveSettings();
+            console.log(`🌐 言語変更: ${newLang}`);
+        }
+
+        // フォントサイズ変更
+        function changeFontSize() {
+            const newSize = document.getElementById('fontSizeSelect').value;
+            gameState.settings.fontSize = newSize;
+            document.body.className = `font-size-${newSize}`;
+            saveSettings();
+            console.log(`📝 フォントサイズ変更: ${newSize}`);
+        }
+
+        // テーマ切り替え
+        function toggleTheme() {
+            const currentTheme = gameState.settings.theme;
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            gameState.settings.theme = newTheme;
+            
+            if (newTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.getElementById('themeToggle').innerHTML = '<i class="fas fa-sun"></i>';
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+                document.getElementById('themeToggle').innerHTML = '<i class="fas fa-moon"></i>';
+            }
+            
+            saveSettings();
+            console.log(`🎨 テーマ変更: ${newTheme}`);
+        }
+
+        // SNSシェア機能
+        function shareToTwitter() {
+            const text = encodeURIComponent(`ケミカルクエストでスコア ${gameState.score}点を達成！🧪 #ケミカルクエスト #化学パズル`);
+            const url = encodeURIComponent(window.location.href);
+            window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+            console.log('📱 Twitterシェア');
+        }
+
+        function shareToFacebook() {
+            const url = encodeURIComponent(window.location.href);
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+            console.log('📱 Facebookシェア');
+        }
+
+        function shareToLine() {
+            const text = encodeURIComponent(`ケミカルクエストでスコア ${gameState.score}点を達成！`);
+            const url = encodeURIComponent(window.location.href);
+            window.open(`https://line.me/R/msg/text/?${text}%0D%0A${url}`, '_blank');
+            console.log('📱 LINEシェア');
+        }
+
+        function copyLink() {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                alert(gameState.settings.language === 'ja' ? 
+                    'リンクをコピーしました！' : 'Link copied!');
+                console.log('🔗 リンクコピー完了');
+            });
+        }
+
+        // Service Worker登録
+        function registerServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(() => console.log('🔧 Service Worker登録完了'))
+                    .catch(err => console.log('❌ Service Worker登録失敗:', err));
+            }
+        }
+
+        // ドラッグ&ドロップ設定
+        function setupDragAndDrop() {
+            const builder = document.getElementById('formulaBuilder');
+            
+            builder.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                builder.classList.add('bg-blue-100');
+            });
+            
+            builder.addEventListener('dragleave', () => {
+                builder.classList.remove('bg-blue-100');
+            });
+            
+            builder.addEventListener('drop', (e) => {
+                e.preventDefault();
+                builder.classList.remove('bg-blue-100');
+                
+                try {
+                    const elementData = JSON.parse(e.dataTransfer.getData('text/plain'));
+                    selectElement(elementData, null);
+                } catch (error) {
+                    console.error('❌ ドラッグデータ解析エラー:', error);
+                }
+            });
+        }
+
+        // ページ読み込み完了時に初期化
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 ページ読み込み完了');
+            initializeApp();
+            setupDragAndDrop();
+        });
+
+        // ページ離脱前に状態を保存
+        window.addEventListener('beforeunload', () => {
+            saveSettings();
+            saveGameHistory();
+        });
+
+        console.log('✅ ケミカルクエスト - スクリプト読み込み完了');
+    </script>
+</body>
+</html>
