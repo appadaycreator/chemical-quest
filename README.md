@@ -59,6 +59,7 @@ chemical-quest-puzzle/
 - アクセシビリティ（文字サイズ5段階, ARIA, コントラスト）
 - SEO（メタタグ, JSON-LD, sitemap.xml）
 - PWA（manifest.json, sw.js）
+- 元素パレットは常時3列グリッドで表示し、操作性・視認性を最適化
 
 ## テスト・品質保証
 - 機能テスト（ドラッグ&ドロップ、バリデーション、PWA等）
