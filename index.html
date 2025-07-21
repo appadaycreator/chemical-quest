@@ -290,8 +290,8 @@
                                 <div class="mb-6">
                                     <h4 class="text-xl font-semibold mb-3" data-i18n="game.target">目標化合物:</h4>
                                     <div id="targetMolecule" class="bg-white bg-opacity-20 rounded-lg p-4 text-center">
-                                        <span class="text-2xl font-mono">H₂O</span>
-                                        <p class="text-sm mt-2 opacity-80">水</p>
+                                        <span id="targetFormulaArea"></span>
+                                        <p class="text-sm mt-2 opacity-80" id="targetMoleculeName"></p>
                                     </div>
                                 </div>
 
@@ -536,7 +536,7 @@
             isGameActive: false,
             selectedElements: [],
             currentFormula: '',
-            targetMolecule: { formula: 'H₂O', name: '水' },
+            targetMolecule: { formula: 'H₂O', name: '水', nameEn: 'Water' },
             elements: [
                 { symbol: 'H', name: 'Hydrogen', nameJa: '水素', mass: 1, available: 10 },
                 { symbol: 'O', name: 'Oxygen', nameJa: '酸素', mass: 16, available: 5 },
@@ -906,6 +906,7 @@
         }
 
         // ランダムターゲット設定
+        let showFormula = false;
         function setRandomTarget() {
             const targets = [
                 { formula: 'H₂O', name: '水', nameEn: 'Water' },
@@ -914,18 +915,24 @@
                 { formula: 'NH₃', name: 'アンモニア', nameEn: 'Ammonia' },
                 { formula: 'CaCl₂', name: '塩化カルシウム', nameEn: 'Calcium Chloride' }
             ];
-            
             gameState.targetMolecule = targets[Math.floor(Math.random() * targets.length)];
-            
-            const targetDiv = document.getElementById('targetMolecule');
-            targetDiv.innerHTML = `
-                <span class="text-2xl font-mono">${gameState.targetMolecule.formula}</span>
-                <p class="text-sm mt-2 opacity-80">
-                    ${gameState.settings.language === 'ja' ? gameState.targetMolecule.name : gameState.targetMolecule.nameEn}
-                </p>
-            `;
-            
+            showFormula = false;
+            renderTargetMolecule();
             console.log(`🎯 新しいターゲット: ${gameState.targetMolecule.formula}`);
+        }
+        function renderTargetMolecule() {
+            const formulaArea = document.getElementById('targetFormulaArea');
+            const nameArea = document.getElementById('targetMoleculeName');
+            nameArea.textContent = gameState.settings.language === 'ja' ? gameState.targetMolecule.name : gameState.targetMolecule.nameEn;
+            if (!showFormula) {
+                formulaArea.innerHTML = `<button id="revealFormulaBtn" class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-4 rounded-full mb-2">？ クリックで化学式を表示</button>`;
+                document.getElementById('revealFormulaBtn').onclick = () => {
+                    showFormula = true;
+                    renderTargetMolecule();
+                };
+            } else {
+                formulaArea.innerHTML = `<span class="text-2xl font-mono">${gameState.targetMolecule.formula}</span>`;
+            }
         }
 
         // 次のレベル
