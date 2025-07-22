@@ -826,7 +826,6 @@
                 
                 // 成功音（将来実装）
                 showSuccessMessage();
-                nextLevel();
                 
             } else {
                 console.log('❌ 不正解');
@@ -887,6 +886,9 @@
             gameState.score = 0;
             gameState.currentLevel = 1;
             
+            // 元素の利用可能数をリセット
+            resetElementAvailability();
+            
             // 最初のターゲット分子を設定
             setRandomTarget();
             
@@ -937,14 +939,29 @@
 
         // 次のレベル
         function nextLevel() {
-            setTimeout(() => {
-                gameState.currentLevel++;
-                clearFormula();
-                setRandomTarget();
-                document.getElementById('currentLevel').textContent = gameState.currentLevel;
-                
-                console.log(`📈 レベルアップ: ${gameState.currentLevel}`);
-            }, 2000);
+            gameState.currentLevel++;
+            clearFormula();
+            resetElementAvailability();
+            setRandomTarget();
+            document.getElementById('currentLevel').textContent = gameState.currentLevel;
+            
+            console.log(`📈 レベルアップ: ${gameState.currentLevel}`);
+        }
+
+        // 元素の利用可能数をリセット
+        function resetElementAvailability() {
+            gameState.elements.forEach(element => {
+                // 元の利用可能数に戻す（レベルに応じて調整可能）
+                if (element.symbol === 'H') element.available = 10;
+                else if (element.symbol === 'O') element.available = 5;
+                else if (element.symbol === 'C') element.available = 6;
+                else if (element.symbol === 'N') element.available = 4;
+                else if (element.symbol === 'Na') element.available = 3;
+                else if (element.symbol === 'Cl') element.available = 3;
+                else if (element.symbol === 'Ca') element.available = 2;
+                else if (element.symbol === 'Fe') element.available = 2;
+            });
+            createElementPalette();
         }
 
         // 成功メッセージ
@@ -952,13 +969,20 @@
             const message = gameState.settings.language === 'ja' ? 
                 '正解です！素晴らしい！' : 'Correct! Great job!';
             
-            // 一時的な成功表示（将来はモーダルで）
-            const builder = document.getElementById('formulaBuilder');
-            const original = builder.innerHTML;
-            builder.innerHTML = `<div class="text-green-600 font-bold text-xl">${message}</div>`;
+            // 成功メッセージを一時的に表示
+            const targetArea = document.getElementById('targetMolecule');
+            const originalContent = targetArea.innerHTML;
+            targetArea.innerHTML = `
+                <div class="bg-green-500 bg-opacity-20 rounded-lg p-4 text-center">
+                    <div class="text-green-600 font-bold text-xl mb-2">${message}</div>
+                    <div class="text-sm opacity-80">次の問題に進みます...</div>
+                </div>
+            `;
             
+            // 2秒後に次のレベルに進む
             setTimeout(() => {
-                builder.innerHTML = original;
+                nextLevel();
+                targetArea.innerHTML = originalContent;
             }, 2000);
         }
 
@@ -967,12 +991,17 @@
             const message = gameState.settings.language === 'ja' ? 
                 '惜しい！もう一度挑戦！' : 'Close! Try again!';
             
-            const builder = document.getElementById('formulaBuilder');
-            const original = builder.innerHTML;
-            builder.innerHTML = `<div class="text-red-600 font-bold text-xl">${message}</div>`;
+            const targetArea = document.getElementById('targetMolecule');
+            const originalContent = targetArea.innerHTML;
+            targetArea.innerHTML = `
+                <div class="bg-red-500 bg-opacity-20 rounded-lg p-4 text-center">
+                    <div class="text-red-600 font-bold text-xl mb-2">${message}</div>
+                    <div class="text-sm opacity-80">もう一度挑戦してください</div>
+                </div>
+            `;
             
             setTimeout(() => {
-                builder.innerHTML = original;
+                targetArea.innerHTML = originalContent;
             }, 2000);
         }
 
