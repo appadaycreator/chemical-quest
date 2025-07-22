@@ -536,7 +536,9 @@
             isGameActive: false,
             selectedElements: [],
             currentFormula: '',
+            showFormula: false,
             targetMolecule: { formula: 'H₂O', name: '水', nameEn: 'Water' },
+            usedTargets: [], // 使用済みターゲットを記録
             elements: [
                 { symbol: 'H', name: 'Hydrogen', nameJa: '水素', mass: 1, available: 10 },
                 { symbol: 'O', name: 'Oxygen', nameJa: '酸素', mass: 16, available: 5 },
@@ -545,7 +547,8 @@
                 { symbol: 'Na', name: 'Sodium', nameJa: 'ナトリウム', mass: 23, available: 3 },
                 { symbol: 'Cl', name: 'Chlorine', nameJa: '塩素', mass: 35, available: 3 },
                 { symbol: 'Ca', name: 'Calcium', nameJa: 'カルシウム', mass: 40, available: 2 },
-                { symbol: 'Fe', name: 'Iron', nameJa: '鉄', mass: 56, available: 2 }
+                { symbol: 'Fe', name: 'Iron', nameJa: '鉄', mass: 56, available: 2 },
+                { symbol: 'S', name: 'Sulfur', nameJa: '硫黄', mass: 32, available: 3 }
             ],
             gameHistory: [],
             settings: {
@@ -885,6 +888,8 @@
             gameState.timeRemaining = 300; // 5分
             gameState.score = 0;
             gameState.currentLevel = 1;
+            gameState.showFormula = false;
+            gameState.usedTargets = []; // 使用済みターゲット履歴をリセット
             
             // 元素の利用可能数をリセット
             resetElementAvailability();
@@ -908,44 +913,144 @@
         }
 
         // ランダムターゲット設定
-        let showFormula = false;
         function setRandomTarget() {
+            console.log('🎯 setRandomTarget() 開始');
             const targets = [
                 { formula: 'H₂O', name: '水', nameEn: 'Water' },
                 { formula: 'NaCl', name: '塩化ナトリウム', nameEn: 'Sodium Chloride' },
                 { formula: 'CO₂', name: '二酸化炭素', nameEn: 'Carbon Dioxide' },
                 { formula: 'NH₃', name: 'アンモニア', nameEn: 'Ammonia' },
-                { formula: 'CaCl₂', name: '塩化カルシウム', nameEn: 'Calcium Chloride' }
+                { formula: 'CaCl₂', name: '塩化カルシウム', nameEn: 'Calcium Chloride' },
+                { formula: 'Fe₂O₃', name: '酸化鉄(III)', nameEn: 'Iron(III) Oxide' },
+                { formula: 'H₂SO₄', name: '硫酸', nameEn: 'Sulfuric Acid' },
+                { formula: 'NaOH', name: '水酸化ナトリウム', nameEn: 'Sodium Hydroxide' },
+                { formula: 'HCl', name: '塩酸', nameEn: 'Hydrochloric Acid' },
+                { formula: 'CH₄', name: 'メタン', nameEn: 'Methane' }
             ];
-            gameState.targetMolecule = targets[Math.floor(Math.random() * targets.length)];
-            showFormula = false;
+            
+            // 使用済みターゲットを避けて選択
+            const availableTargets = targets.filter(target => 
+                !gameState.usedTargets.includes(target.formula)
+            );
+            
+            console.log(`📊 使用済みターゲット: [${gameState.usedTargets.join(', ')}]`);
+            console.log(`📊 利用可能なターゲット: ${availableTargets.length}個`);
+            
+            // すべてのターゲットが使用済みの場合はリセット
+            if (availableTargets.length === 0) {
+                console.log('🔄 すべてのターゲットが使用済みのため、履歴をリセット');
+                gameState.usedTargets = [];
+                availableTargets.push(...targets);
+            }
+            
+            const randomIndex = Math.floor(Math.random() * availableTargets.length);
+            const selectedTarget = availableTargets[randomIndex];
+            
+            console.log(`🎲 ランダムインデックス: ${randomIndex}`);
+            console.log(`🎯 選択されたターゲット: ${selectedTarget.formula} (${selectedTarget.name})`);
+            
+            gameState.targetMolecule = selectedTarget;
+            gameState.usedTargets.push(selectedTarget.formula);
+            gameState.showFormula = false;
+            
+            console.log('🔄 showFormula を false にリセット');
+            console.log('🎨 renderTargetMolecule() を呼び出し');
             renderTargetMolecule();
+            
             console.log(`🎯 新しいターゲット: ${gameState.targetMolecule.formula}`);
+            console.log('✅ setRandomTarget() 完了');
         }
         function renderTargetMolecule() {
-            const formulaArea = document.getElementById('targetFormulaArea');
-            const nameArea = document.getElementById('targetMoleculeName');
-            nameArea.textContent = gameState.settings.language === 'ja' ? gameState.targetMolecule.name : gameState.targetMolecule.nameEn;
-            if (!showFormula) {
-                formulaArea.innerHTML = `<button id="revealFormulaBtn" class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-4 rounded-full mb-2">？ クリックで化学式を表示</button>`;
-                document.getElementById('revealFormulaBtn').onclick = () => {
-                    showFormula = true;
-                    renderTargetMolecule();
-                };
-            } else {
-                formulaArea.innerHTML = `<span class="text-2xl font-mono">${gameState.targetMolecule.formula}</span>`;
-            }
+            console.log('🎨 renderTargetMolecule() 開始');
+            console.log(`📊 現在のターゲット: ${gameState.targetMolecule.formula}`);
+            console.log(`👁️ showFormula: ${gameState.showFormula}`);
+            
+            // DOM要素が存在するまで待機
+            const checkElements = () => {
+                const formulaArea = document.getElementById('targetFormulaArea');
+                const nameArea = document.getElementById('targetMoleculeName');
+                
+                if (!formulaArea || !nameArea) {
+                    console.log('⏳ DOM要素を待機中...');
+                    setTimeout(checkElements, 100);
+                    return;
+                }
+                
+                console.log('✅ DOM要素が見つかりました');
+                console.log(`📝 分子名を設定: ${gameState.settings.language === 'ja' ? gameState.targetMolecule.name : gameState.targetMolecule.nameEn}`);
+                
+                nameArea.textContent = gameState.settings.language === 'ja' ? gameState.targetMolecule.name : gameState.targetMolecule.nameEn;
+                
+                if (!gameState.showFormula) {
+                    console.log('🔘 化学式表示ボタンを設定');
+                    formulaArea.innerHTML = `<button id="revealFormulaBtn" class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-4 rounded-full mb-2">？ クリックで化学式を表示</button>`;
+                    
+                    // イベントリスナーを確実に設定
+                    setTimeout(() => {
+                        const revealBtn = document.getElementById('revealFormulaBtn');
+                        if (revealBtn) {
+                            console.log('✅ 化学式表示ボタンのイベントリスナーを設定');
+                            revealBtn.addEventListener('click', () => {
+                                console.log('🔍 化学式表示ボタンがクリックされました');
+                                gameState.showFormula = true;
+                                renderTargetMolecule();
+                            });
+                        } else {
+                            console.error('❌ revealFormulaBtn が見つかりません');
+                        }
+                    }, 100);
+                } else {
+                    console.log('🧪 化学式を表示');
+                    formulaArea.innerHTML = `<span class="text-2xl font-mono">${gameState.targetMolecule.formula}</span>`;
+                }
+                console.log('✅ renderTargetMolecule() 完了');
+            };
+            
+            checkElements();
         }
 
         // 次のレベル
         function nextLevel() {
+            console.log('🚀 nextLevel() 開始');
             gameState.currentLevel++;
+            console.log(`📊 レベル: ${gameState.currentLevel}`);
+            
             clearFormula();
+            console.log('🗑️ 化学式クリア完了');
+            
             resetElementAvailability();
+            console.log('🔄 元素リセット完了');
+            
+            // 成功メッセージをクリア
+            const targetArea = document.getElementById('targetMolecule');
+            if (targetArea) {
+                targetArea.innerHTML = `
+                    <span id="targetFormulaArea"></span>
+                    <p class="text-sm mt-2 opacity-80" id="targetMoleculeName"></p>
+                `;
+                console.log('🧹 成功メッセージをクリア');
+            }
+            
             setRandomTarget();
-            document.getElementById('currentLevel').textContent = gameState.currentLevel;
+            console.log('🎯 ターゲット設定完了');
+            
+            const levelElement = document.getElementById('currentLevel');
+            if (levelElement) {
+                levelElement.textContent = gameState.currentLevel;
+                console.log('📝 レベル表示更新完了');
+            } else {
+                console.error('❌ currentLevel 要素が見つかりません');
+            }
+            
+            // UIを強制的に更新（少し遅延）
+            setTimeout(() => {
+                console.log('⏰ UI更新タイマー開始');
+                renderTargetMolecule();
+                console.log('🔄 UI更新完了');
+            }, 200);
             
             console.log(`📈 レベルアップ: ${gameState.currentLevel}`);
+            console.log('✅ nextLevel() 完了');
         }
 
         // 元素の利用可能数をリセット
@@ -960,30 +1065,43 @@
                 else if (element.symbol === 'Cl') element.available = 3;
                 else if (element.symbol === 'Ca') element.available = 2;
                 else if (element.symbol === 'Fe') element.available = 2;
+                else if (element.symbol === 'S') element.available = 3;
             });
             createElementPalette();
         }
 
         // 成功メッセージ
         function showSuccessMessage() {
+            console.log('🎉 showSuccessMessage() 開始');
             const message = gameState.settings.language === 'ja' ? 
                 '正解です！素晴らしい！' : 'Correct! Great job!';
             
             // 成功メッセージを一時的に表示
-            const targetArea = document.getElementById('targetMolecule');
-            const originalContent = targetArea.innerHTML;
-            targetArea.innerHTML = `
-                <div class="bg-green-500 bg-opacity-20 rounded-lg p-4 text-center">
-                    <div class="text-green-600 font-bold text-xl mb-2">${message}</div>
-                    <div class="text-sm opacity-80">次の問題に進みます...</div>
-                </div>
-            `;
+            const checkTargetArea = () => {
+                const targetArea = document.getElementById('targetMolecule');
+                if (!targetArea) {
+                    console.log('⏳ targetMolecule を待機中...');
+                    setTimeout(checkTargetArea, 100);
+                    return;
+                }
+                
+                console.log('✅ targetMolecule が見つかりました');
+                targetArea.innerHTML = `
+                    <div class="bg-green-500 bg-opacity-20 rounded-lg p-4 text-center">
+                        <div class="text-green-600 font-bold text-xl mb-2">${message}</div>
+                        <div class="text-sm opacity-80">次の問題に進みます...</div>
+                    </div>
+                `;
+                
+                console.log('⏰ 2秒後に次のレベルに進みます');
+                // 2秒後に次のレベルに進む
+                setTimeout(() => {
+                    console.log('🔄 次のレベルに進みます');
+                    nextLevel();
+                }, 2000);
+            };
             
-            // 2秒後に次のレベルに進む
-            setTimeout(() => {
-                nextLevel();
-                targetArea.innerHTML = originalContent;
-            }, 2000);
+            checkTargetArea();
         }
 
         // 失敗メッセージ
@@ -997,11 +1115,11 @@
                 <div class="bg-red-500 bg-opacity-20 rounded-lg p-4 text-center">
                     <div class="text-red-600 font-bold text-xl mb-2">${message}</div>
                     <div class="text-sm opacity-80">もう一度挑戦してください</div>
-                </div>
+            </div>
             `;
             
             setTimeout(() => {
-                targetArea.innerHTML = originalContent;
+                renderTargetMolecule();
             }, 2000);
         }
 
