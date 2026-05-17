@@ -276,6 +276,25 @@
                     <p class="text-gray-600 text-lg" data-i18n="game.description">元素を組み合わせて正しい化学式を作りましょう</p>
                 </div>
 
+                <!-- 難易度選択 -->
+                <div class="max-w-md mx-auto mb-8 text-center">
+                    <p class="text-sm font-bold text-gray-600 mb-3">🎮 難易度を選択</p>
+                    <div class="flex justify-center gap-3">
+                        <button onclick="setDifficulty('easy')" id="diffBtnEasy"
+                            class="px-4 py-2 rounded-full text-sm font-bold border-2 border-green-500 bg-green-500 text-white">
+                            🟢 初級（7問）
+                        </button>
+                        <button onclick="setDifficulty('medium')" id="diffBtnMedium"
+                            class="px-4 py-2 rounded-full text-sm font-bold border-2 border-yellow-500 text-yellow-700 bg-white">
+                            🟡 中級（15問）
+                        </button>
+                        <button onclick="setDifficulty('hard')" id="diffBtnHard"
+                            class="px-4 py-2 rounded-full text-sm font-bold border-2 border-red-500 text-red-700 bg-white">
+                            🔴 上級（21問）
+                        </button>
+                    </div>
+                </div>
+
                 <div class="max-w-6xl mx-auto">
                     <div class="grid lg:grid-cols-4 gap-8">
                         <!-- Game Board -->
@@ -942,7 +961,19 @@
             const hints = {
                 'H₂O': ['水は水素2つと酸素1つで構成されています', 'Hを2つ、Oを1つ使ってください'],
                 'NaCl': ['塩化ナトリウム（食塩）です', 'ナトリウムと塩素を1つずつ'],
-                'CO₂': ['二酸化炭素です', '炭素1つと酸素2つを組み合わせてください']
+                'CO₂': ['二酸化炭素です', '炭素1つと酸素2つを組み合わせてください'],
+                'HCl': ['塩酸（塩化水素）です', 'Hを1つ、Clを1つ使ってください'],
+                'NH₃': ['アンモニアです', 'Nを1つ、Hを3つ使ってください'],
+                'CH₄': ['メタン（天然ガスの主成分）です', 'Cを1つ、Hを4つ使ってください'],
+                'NaOH': ['水酸化ナトリウム（苛性ソーダ）です', 'Na・O・Hをそれぞれ1つずつ'],
+                'CaCl₂': ['塩化カルシウムです', 'Caを1つ、Clを2つ使ってください'],
+                'Fe₂O₃': ['酸化鉄(III)（さびの主成分）です', 'Feを2つ、Oを3つ使ってください'],
+                'H₂SO₄': ['硫酸です', 'H×2、S×1、O×4を組み合わせてください'],
+                'Na₂O': ['酸化ナトリウムです', 'Naを2つ、Oを1つ使ってください'],
+                'CaO': ['酸化カルシウム（生石灰）です', 'CaとOをそれぞれ1つずつ'],
+                'N₂O': ['亜酸化窒素（笑気ガス）です', 'Nを2つ、Oを1つ使ってください'],
+                'SO₂': ['二酸化硫黄です', 'Sを1つ、Oを2つ使ってください'],
+                'H₂S': ['硫化水素です', 'Hを2つ、Sを1つ使ってください']
             };
             
             const hint = hints[gameState.targetMolecule.formula];
@@ -968,7 +999,26 @@
             // 元素の利用可能数をリセット
             resetElementAvailability();
             
-            // 最初のターゲット分子を設定
+            // 難易度変更
+        function setDifficulty(diff) {
+            gameState.difficulty = diff;
+            gameState.usedTargets = [];
+            ['easy','medium','hard'].forEach(d => {
+                const btn = document.getElementById('diffBtn' + d.charAt(0).toUpperCase() + d.slice(1));
+                if (btn) {
+                    const colors = {easy:'green', medium:'yellow', hard:'red'};
+                    const c = colors[d];
+                    if (d === diff) {
+                        btn.className = `px-4 py-2 rounded-full text-sm font-bold border-2 border-${c}-500 bg-${c}-500 text-white`;
+                    } else {
+                        btn.className = `px-4 py-2 rounded-full text-sm font-bold border-2 border-${c}-500 text-${c}-700 bg-white`;
+                    }
+                }
+            });
+            setRandomTarget();
+        }
+
+        // 最初のターゲット分子を設定
             setRandomTarget();
             
             // タイマー開始
@@ -986,20 +1036,47 @@
             document.getElementById('learn').scrollIntoView({ behavior: 'smooth' });
         }
 
+        // 難易度別問題データ
+        const PUZZLE_LEVELS = {
+            easy: [
+                { formula: 'H₂O', name: '水', nameEn: 'Water', hint: 'H×2 + O×1 （日常でよく使う水）' },
+                { formula: 'NaCl', name: '塩化ナトリウム', nameEn: 'Sodium Chloride', hint: 'Na×1 + Cl×1 （食塩の主成分）' },
+                { formula: 'CO₂', name: '二酸化炭素', nameEn: 'Carbon Dioxide', hint: 'C×1 + O×2 （呼気に含まれる気体）' },
+                { formula: 'HCl', name: '塩酸', nameEn: 'Hydrochloric Acid', hint: 'H×1 + Cl×1 （胃液に含まれる酸）' },
+                { formula: 'NH₃', name: 'アンモニア', nameEn: 'Ammonia', hint: 'N×1 + H×3 （独特の刺激臭がある気体）' },
+                { formula: 'CH₄', name: 'メタン', nameEn: 'Methane', hint: 'C×1 + H×4 （天然ガスの主成分）' },
+                { formula: 'NaOH', name: '水酸化ナトリウム', nameEn: 'Sodium Hydroxide', hint: 'Na×1 + O×1 + H×1 （苛性ソーダ）' },
+            ],
+            medium: [
+                { formula: 'CaCl₂', name: '塩化カルシウム', nameEn: 'Calcium Chloride', hint: 'Ca×1 + Cl×2 （融雪剤・乾燥剤）' },
+                { formula: 'Fe₂O₃', name: '酸化鉄(III)', nameEn: 'Iron(III) Oxide', hint: 'Fe×2 + O×3 （さびの主成分）' },
+                { formula: 'H₂SO₄', name: '硫酸', nameEn: 'Sulfuric Acid', hint: 'H×2 + S×1 + O×4 （工業用強酸）' },
+                { formula: 'Na₂O', name: '酸化ナトリウム', nameEn: 'Sodium Oxide', hint: 'Na×2 + O×1' },
+                { formula: 'CaO', name: '酸化カルシウム', nameEn: 'Calcium Oxide', hint: 'Ca×1 + O×1 （生石灰）' },
+                { formula: 'N₂O', name: '亜酸化窒素', nameEn: 'Nitrous Oxide', hint: 'N×2 + O×1 （笑気ガス）' },
+                { formula: 'SO₂', name: '二酸化硫黄', nameEn: 'Sulfur Dioxide', hint: 'S×1 + O×2 （火山ガス）' },
+                { formula: 'H₂S', name: '硫化水素', nameEn: 'Hydrogen Sulfide', hint: 'H×2 + S×1 （卵の腐ったにおい）' },
+            ],
+            hard: [
+                { formula: 'Ca(OH)₂', name: '水酸化カルシウム', nameEn: 'Calcium Hydroxide', hint: 'Ca×1 + O×2 + H×2 （消石灰・石灰水）' },
+                { formula: 'Fe(OH)₃', name: '水酸化鉄(III)', nameEn: 'Iron(III) Hydroxide', hint: 'Fe×1 + O×3 + H×3 （赤褐色の沈殿）' },
+                { formula: 'NaHCO₃', name: '炭酸水素ナトリウム', nameEn: 'Sodium Bicarbonate', hint: 'Na×1 + H×1 + C×1 + O×3 （重曹）' },
+                { formula: 'Na₂SO₄', name: '硫酸ナトリウム', nameEn: 'Sodium Sulfate', hint: 'Na×2 + S×1 + O×4' },
+                { formula: 'CaSO₄', name: '硫酸カルシウム', nameEn: 'Calcium Sulfate', hint: 'Ca×1 + S×1 + O×4 （石膏）' },
+                { formula: 'Fe₂(SO₄)₃', name: '硫酸鉄(III)', nameEn: 'Iron(III) Sulfate', hint: 'Fe×2 + S×3 + O×12' },
+            ]
+        };
+        // 現在の難易度（デフォルト: easy）
+        if (!gameState.difficulty) gameState.difficulty = 'easy';
+
         // ランダムターゲット設定
         function setRandomTarget() {
             console.log('🎯 setRandomTarget() 開始');
+            const diff = gameState.difficulty || 'easy';
             const targets = [
-                { formula: 'H₂O', name: '水', nameEn: 'Water' },
-                { formula: 'NaCl', name: '塩化ナトリウム', nameEn: 'Sodium Chloride' },
-                { formula: 'CO₂', name: '二酸化炭素', nameEn: 'Carbon Dioxide' },
-                { formula: 'NH₃', name: 'アンモニア', nameEn: 'Ammonia' },
-                { formula: 'CaCl₂', name: '塩化カルシウム', nameEn: 'Calcium Chloride' },
-                { formula: 'Fe₂O₃', name: '酸化鉄(III)', nameEn: 'Iron(III) Oxide' },
-                { formula: 'H₂SO₄', name: '硫酸', nameEn: 'Sulfuric Acid' },
-                { formula: 'NaOH', name: '水酸化ナトリウム', nameEn: 'Sodium Hydroxide' },
-                { formula: 'HCl', name: '塩酸', nameEn: 'Hydrochloric Acid' },
-                { formula: 'CH₄', name: 'メタン', nameEn: 'Methane' }
+                ...PUZZLE_LEVELS.easy,
+                ...(diff === 'medium' || diff === 'hard' ? PUZZLE_LEVELS.medium : []),
+                ...(diff === 'hard' ? PUZZLE_LEVELS.hard : []),
             ];
             
             // 使用済みターゲットを避けて選択
