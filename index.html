@@ -366,42 +366,71 @@
                 </div>
 
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                    <!-- 基礎化学 -->
                     <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl p-6 transform hover:scale-105 transition">
                         <i class="fas fa-atom text-3xl mb-4"></i>
-                        <h4 class="text-xl font-semibold mb-3" data-i18n="learn.basics">基礎化学</h4>
-                        <p class="mb-4" data-i18n="learn.basics_desc">原子、分子、元素の基本概念</p>
-                        <button class="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition" data-i18n="common.coming_soon">
-                            Coming Soon
+                        <h4 class="text-xl font-semibold mb-3">基礎化学</h4>
+                        <ul class="text-sm space-y-1 mb-4 text-blue-100">
+                            <li>⚛️ <strong>原子</strong> — 物質の最小単位。陽子・中性子・電子で構成</li>
+                            <li>🔗 <strong>分子</strong> — 原子が結合したもの（H₂O = 水素2 + 酸素1）</li>
+                            <li>📋 <strong>元素</strong> — 同じ原子番号を持つ原子の種類（118種類）</li>
+                            <li>⚖️ <strong>原子量</strong> — 炭素12を基準とした相対質量</li>
+                        </ul>
+                        <button onclick="document.querySelector('.game-container, #game, canvas')?.scrollIntoView({behavior:'smooth'})"
+                            class="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition w-full">
+                            🎮 ゲームで体験する
                         </button>
                     </div>
 
+                    <!-- 化学結合 -->
                     <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl p-6 transform hover:scale-105 transition">
                         <i class="fas fa-link text-3xl mb-4"></i>
-                        <h4 class="text-xl font-semibold mb-3" data-i18n="learn.bonds">化学結合</h4>
-                        <p class="mb-4" data-i18n="learn.bonds_desc">イオン結合、共有結合、金属結合</p>
-                        <button class="bg-white text-green-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition" data-i18n="common.coming_soon">
-                            Coming Soon
+                        <h4 class="text-xl font-semibold mb-3">化学結合</h4>
+                        <ul class="text-sm space-y-1 mb-4 text-green-100">
+                            <li>⚡ <strong>イオン結合</strong> — Na⁺とCl⁻が引き合う（食塩 NaCl）</li>
+                            <li>🤝 <strong>共有結合</strong> — 電子を共有する（水 H₂O、二酸化炭素 CO₂）</li>
+                            <li>🔩 <strong>金属結合</strong> — 自由電子が金属原子間を移動する</li>
+                            <li>💧 <strong>水素結合</strong> — HとO/N/Fの間の弱い結合</li>
+                        </ul>
+                        <button onclick="document.querySelector('.game-container, #game, canvas')?.scrollIntoView({behavior:'smooth'})"
+                            class="bg-white text-green-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition w-full">
+                            🎮 ゲームで体験する
                         </button>
                     </div>
 
+                    <!-- 化学反応 -->
                     <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl p-6 transform hover:scale-105 transition">
                         <i class="fas fa-flask text-3xl mb-4"></i>
-                        <h4 class="text-xl font-semibold mb-3" data-i18n="learn.reactions">化学反応</h4>
-                        <p class="mb-4" data-i18n="learn.reactions_desc">反応式の書き方とバランス</p>
-                        <button class="bg-white text-purple-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition" data-i18n="common.coming_soon">
-                            Coming Soon
+                        <h4 class="text-xl font-semibold mb-3">化学反応</h4>
+                        <ul class="text-sm space-y-1 mb-4 text-purple-100">
+                            <li>🔥 <strong>燃焼</strong> — CH₄ + 2O₂ → CO₂ + 2H₂O</li>
+                            <li>⚗️ <strong>中和</strong> — HCl + NaOH → NaCl + H₂O</li>
+                            <li>🌱 <strong>光合成</strong> — 6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂</li>
+                            <li>⚖️ <strong>質量保存則</strong> — 反応前後の質量は変わらない</li>
+                        </ul>
+                        <button onclick="document.querySelector('.game-container, #game, canvas')?.scrollIntoView({behavior:'smooth'})"
+                            class="bg-white text-purple-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition w-full">
+                            🎮 ゲームで体験する
                         </button>
                     </div>
                 </div>
 
-                <!-- Periodic Table Preview -->
+                <!-- 主要元素一覧 -->
                 <div class="mt-16 text-center">
-                    <h4 class="text-2xl font-bold mb-8" data-i18n="learn.periodic_table">周期表</h4>
-                    <div class="bg-gray-100 rounded-xl p-8 max-w-4xl mx-auto" style="background: var(--bg-secondary);">
-                        <div class="periodic-table-mini mx-auto">
-                            <!-- 最初の数個の元素のみ表示 -->
+                    <h4 class="text-2xl font-bold mb-8">ゲームに登場する主要元素</h4>
+                    <div class="rounded-xl p-6 max-w-4xl mx-auto" style="background: var(--bg-secondary);">
+                        <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-9 gap-2 text-sm">
+                            <div class="bg-red-100 rounded p-2 text-center"><div class="font-bold text-red-700">H</div><div class="text-xs text-gray-600">水素</div></div>
+                            <div class="bg-yellow-100 rounded p-2 text-center"><div class="font-bold text-yellow-700">He</div><div class="text-xs text-gray-600">ヘリウム</div></div>
+                            <div class="bg-blue-100 rounded p-2 text-center"><div class="font-bold text-blue-700">C</div><div class="text-xs text-gray-600">炭素</div></div>
+                            <div class="bg-blue-100 rounded p-2 text-center"><div class="font-bold text-blue-700">N</div><div class="text-xs text-gray-600">窒素</div></div>
+                            <div class="bg-red-100 rounded p-2 text-center"><div class="font-bold text-red-700">O</div><div class="text-xs text-gray-600">酸素</div></div>
+                            <div class="bg-green-100 rounded p-2 text-center"><div class="font-bold text-green-700">Na</div><div class="text-xs text-gray-600">ナトリウム</div></div>
+                            <div class="bg-orange-100 rounded p-2 text-center"><div class="font-bold text-orange-700">Cl</div><div class="text-xs text-gray-600">塩素</div></div>
+                            <div class="bg-purple-100 rounded p-2 text-center"><div class="font-bold text-purple-700">Ca</div><div class="text-xs text-gray-600">カルシウム</div></div>
+                            <div class="bg-gray-100 rounded p-2 text-center"><div class="font-bold text-gray-700">Fe</div><div class="text-xs text-gray-600">鉄</div></div>
                         </div>
-                        <p class="mt-4 text-gray-600" data-i18n="learn.periodic_note">クリックして元素の詳細を見る（実装予定）</p>
+                        <p class="mt-4 text-gray-500 text-sm">元素記号を組み合わせて化学式を作ろう！</p>
                     </div>
                 </div>
             </div>
